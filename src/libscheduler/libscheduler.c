@@ -112,7 +112,8 @@ int scheduler_quantum_expired(int core_id, int time)
  */
 float scheduler_average_waiting_time()
 {
-	return 0.0;
+  float sawt = waitime / nnJobs;
+	return sawt;
 }
 
 
@@ -125,7 +126,8 @@ float scheduler_average_waiting_time()
  */
 float scheduler_average_turnaround_time()
 {
-	return 0.0;
+  float avgtt = tatime / nJobs;
+	return avgtt;
 }
 
 
@@ -138,7 +140,8 @@ float scheduler_average_turnaround_time()
  */
 float scheduler_average_response_time()
 {
-	return 0.0;
+  float respavg = resptime / nJobs;
+	return respavg;
 }
 
 

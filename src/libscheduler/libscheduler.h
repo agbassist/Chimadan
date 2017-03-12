@@ -7,7 +7,32 @@
 /**
   Constants which represent the different scheduling algorithms
 */
+
+
+typedef struct job_task
+{
+float pid;
+float atime;
+float prior;
+float otime;
+float ptime;
+float rtime;
+float ltime;
+
+} job_task;
+
+job_task ** jtarr;
+
+
+float ncores;
+float nJobs;
+float waittime;
+float tatime;
+float resptime;
+ 
 typedef enum {FCFS = 0, SJF, PSJF, PRI, PPRI, RR} scheme_t;
+
+scheme_t type;
 
 void  scheduler_start_up               (int cores, scheme_t scheme);
 int   scheduler_new_job                (int job_number, int time, int running_time, int priority);
