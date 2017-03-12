@@ -4,12 +4,14 @@
 #ifndef LIBPRIQUEUE_H_
 #define LIBPRIQUEUE_H_
 
-typedef struct _task_t
-{
+typedef struct _task_t task_t;
+
+struct _task_t {
+
     task_t * next;
     void * ptr;
 
-} task_t;
+};
 
 /**
   Priqueue Data Structure

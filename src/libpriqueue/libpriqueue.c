@@ -35,7 +35,7 @@ int priqueue_offer(priqueue_t *q, void *ptr)
 {
     task_t * temp = q->head;
 
-    while(temp-> != NULL) temp = temp->next;
+    while(temp != NULL) temp = temp->next;
     temp->ptr = ptr;
 
     q->size = q->size+1;
@@ -67,7 +67,7 @@ void *priqueue_peek(priqueue_t *q)
  */
 void *priqueue_poll(priqueue_t *q)
 {
-	if(q->head == null) return NULL;
+	if(q->head == NULL) return NULL;
     else{
         task_t * temp = q->head;
         q->head = q->head->next;
@@ -112,14 +112,26 @@ void *priqueue_at(priqueue_t *q, int index)
 int priqueue_remove(priqueue_t *q, void *ptr)
 {
     task_t * temp = q->head;
+    task_t * last = q->head;
     int count = 0;
+
     while(temp != NULL){
         if(temp->ptr == ptr){
 
+            if(temp == q->head){
+                q->head = q->head->next;
+            }
+            else{
+                last->next = temp->next;
+            }
+            free(temp);
         }
+        last = temp;
+        temp = temp->next;
+        count++;
     }
 
-    return 0;
+    return count;
 }
 
 
@@ -134,7 +146,22 @@ int priqueue_remove(priqueue_t *q, void *ptr)
  */
 void *priqueue_remove_at(priqueue_t *q, int index)
 {
-	return 0;
+    task_t * temp = q->head;
+    task_t * prev = q->head;
+    int count = 0;
+
+    while(temp != NULL && count <= index){
+        prev = temp;
+        temp = temp->next;
+        count = count + 1;
+    }
+
+    if(temp == q-> head) q->head = temp->next;
+    else{
+        prev->next = temp->next;
+    }
+
+    return temp;
 }
 
 
@@ -157,5 +184,5 @@ int priqueue_size(priqueue_t *q)
  */
 void priqueue_destroy(priqueue_t *q)
 {
-
+    for(int i=0; i <= q->size; i++) priqueue_remove(q, 0);
 }
