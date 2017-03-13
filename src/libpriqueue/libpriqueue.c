@@ -33,12 +33,24 @@ void priqueue_init(priqueue_t *q, int(*comparer)(const void *, const void *))
  */
 int priqueue_offer(priqueue_t *q, void *ptr)
 {
-    task_t * temp = q->head;
+    if(q->head == NULL){
+        q->head = malloc(sizeof(task_t));
+        q->head->ptr = ptr;
+        q->head->next = NULL;
+    }
+    else{
+        task_t * temp = q->head;
 
-    while(temp != NULL) temp = temp->next;
-    temp->ptr = ptr;
+        while(temp->next != NULL){
+            temp = temp->next;
+        }
 
-    q->size = q->size+1;
+        //now temp->next points to NULL at the end
+        temp->next = malloc(sizeof(task_t));
+        temp->next->ptr = ptr;
+        temp->next->next = NULL;
+    }
+    q->size++;
     return q->size;
 }
 
@@ -67,12 +79,23 @@ void *priqueue_peek(priqueue_t *q)
  */
 void *priqueue_poll(priqueue_t *q)
 {
-	if(q->head == NULL) return NULL;
+	task_t * temp = q->head;
+    if(temp == NULL){
+        return NULL;
+    }
     else{
-        task_t * temp = q->head;
-        q->head = q->head->next;
+        if(temp->next != NULL){
+            q->head = temp->next;
+        }
+        else{ //size of queue is 1
+            q->head = NULL;
+        }
+
+        void* data = temp->ptr;
         free(temp);
-        return q->head;
+        q->size--;
+
+        return(data);
     }
 }
 
@@ -91,12 +114,12 @@ void *priqueue_at(priqueue_t *q, int index)
     task_t * temp = q->head;
     int count = 0;
 
-    while(temp != NULL && count <= index){
+    while(temp != NULL && count < index){
         temp = temp->next;
         count = count + 1;
     }
 
-    return temp;
+    return temp->ptr;
 }
 
 
@@ -111,27 +134,36 @@ void *priqueue_at(priqueue_t *q, int index)
  */
 int priqueue_remove(priqueue_t *q, void *ptr)
 {
-    task_t * temp = q->head;
-    task_t * last = q->head;
-    int count = 0;
-
-    while(temp != NULL){
-        if(temp->ptr == ptr){
-
-            if(temp == q->head){
-                q->head = q->head->next;
-            }
-            else{
-                last->next = temp->next;
-            }
-            free(temp);
-        }
-        last = temp;
-        temp = temp->next;
-        count++;
+    if(q->head == NULL){
+        return 0;
     }
+    else{
+        task_t * temp = q->head; //used to traverse queue
+        task_t * prev = q->head; //stores the previous temp value, used for reassigning next values
+        int count = 0; //used to count how many have been removed
 
-    return count;
+        while(temp != NULL){ //while temp is not at the end
+
+            if(temp->ptr == ptr){ //if we have a match
+
+                if(temp == q->head){ //if the head is a match
+                    q->head = q->head->next; //reset the head
+                }
+                else{
+                    prev->next = temp->next;
+                }
+                free(temp);
+                temp = prev;
+                q->size--;
+                count++;
+            }
+
+            prev = temp;
+            temp = temp->next;
+        }
+
+        return count;
+    }
 }
 
 
@@ -156,7 +188,9 @@ void *priqueue_remove_at(priqueue_t *q, int index)
         count = count + 1;
     }
 
-    if(temp == q-> head) q->head = temp->next;
+    if(temp == q-> head){
+        q->head = temp->next;
+    }
     else{
         prev->next = temp->next;
     }
@@ -185,4 +219,25 @@ int priqueue_size(priqueue_t *q)
 void priqueue_destroy(priqueue_t *q)
 {
     for(int i=0; i <= q->size; i++) priqueue_remove(q, 0);
+}
+
+void priqueue_print(priqueue_t *q)
+{
+  task_t* temp = q->head;
+
+  if(temp != NULL) {
+    printf("[");
+
+    while(temp != NULL) {
+      if(temp->next != NULL) {
+        printf("%i, ", *(int *)temp->ptr);
+      }
+      else
+        printf("%i]\n", *(int *)temp->ptr);
+      temp = temp->next;
+    }
+  }
+  else {
+    printf("[]");
+  }
 }
