@@ -112,7 +112,7 @@ int scheduler_quantum_expired(int core_id, int time)
  */
 float scheduler_average_waiting_time()
 {
-  float sawt = waitime / nnJobs;
+  float sawt = waittime / nJobs;
 	return sawt;
 }
 
