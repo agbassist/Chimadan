@@ -112,7 +112,7 @@ int scheduler_quantum_expired(int core_id, int time)
  */
 float scheduler_average_waiting_time()
 {
-  float sawt = waitime / nnJobs;
+  float sawt = waittime / nJobs;
 	return sawt;
 }
 
@@ -153,7 +153,21 @@ float scheduler_average_response_time()
 */
 void scheduler_clean_up()
 {
+  int x =0 ;
+  while (x < ncores)
+  {
+    if(jtarr[x] == NULL)
+    {
+     //do nothing beacause no job_task inside
+    }
+    else
+    {
+       free(jtarr[x]);
 
+    }
+    x++;
+  }
+  free(jtarr);
 }
 
 
