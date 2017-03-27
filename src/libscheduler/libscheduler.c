@@ -19,7 +19,7 @@ typedef struct _job_t
   int pid;
   float atime;
   float prior;
-  float otime;
+  float optime;
   float ptime;
   float rtime;
   float ltime;
@@ -30,6 +30,55 @@ job_t ** jtarr;
 
 priqueue_t Queue;
 
+int ShortestJobFirst(void * x, void * y)
+{
+  if( *(job_t*).ptime > *(job_t*).ptime) //if the first arrived later return the second
+  {
+    return 1;
+  }
+  else if (*(job_t*).ptime < *(job_t*).ptime)// if the first arrived earlier return the first
+  {
+    return -1;
+  }
+  else
+  {
+    return 0;
+  }
+
+}
+int PriorityFirst(void * x, void * b)
+{
+  if( *(job_t*).prior > *(job_t*).prior) //If the first has a larger priority value, return the second
+  {
+    return 1;
+  }
+  else if ( *(job_t*).prior < *(job_t*).prior)// If the first has a lower priority value, return the first
+  {
+    return -1;
+  }
+  else
+  {
+    if( *(job_t*).ptime > *(job_t*).ptime) //if the first arrived later return the second
+    {
+      return 1;
+    }
+    else if (*(job_t*).ptime < *(job_t*).ptime)// if the first arrived earlier return the first
+    {
+      return -1;
+    }
+    else
+    {
+      return 0;
+    }
+
+
+  }
+
+}
+int FirstComeFirstServe(void * a, void * b)
+{
+    return 1;
+}
 /**
   Initalizes the scheduler.
 
@@ -44,6 +93,31 @@ priqueue_t Queue;
 */
 void scheduler_start_up(int cores, scheme_t scheme)
 {
+  //assign the type of comprison with the initialization of the queue
+  if(scheme == FCFS)
+  {
+  prequeue_init(&Q, FirstComeFirstServe);
+  }
+  if(scheme == RR)
+  {
+    prequeue_init(&Q, FirstComeFirstServe);
+  }
+  if(scheme == SJF)
+  {
+    prequeue_init(&Q, ShortestJobFirst);
+  }
+  if(scheme == PSJF)
+  {
+    prequeue_init(&Q, ShortestJobFirst);
+  }
+  if(scheme == PRI)
+  {
+    priqueue_init(&Q, PriorityFirst);
+  }
+  if(scheme == PPRI)
+  {
+    priqueue_init(&Q, PriorityFirst);
+  }
 
 
 
@@ -113,6 +187,15 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
  */
 int scheduler_job_finished(int core_id, int job_number, int time)
 {
+  //update the number of jobs
+  njobs = njobs + 1;
+  //update the average times
+  tjarr[core_id]
+
+  waittime
+
+
+
 	return -1;
 }
 
@@ -132,7 +215,7 @@ int scheduler_job_finished(int core_id, int job_number, int time)
  */
 int scheduler_quantum_expired(int core_id, int time)
 {
-	return -1;
+  job_t
 }
 
 
