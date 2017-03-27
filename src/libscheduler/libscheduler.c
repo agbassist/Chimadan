@@ -26,6 +26,9 @@ typedef struct _job_t
 
 } job_t;
 
+job_t ** jtarr;
+
+priqueue_t Queue;
 
 /**
   Initalizes the scheduler.
@@ -44,25 +47,25 @@ void scheduler_start_up(int cores, scheme_t scheme)
 
 
 
-waittime = 0;
-nJobs = 0;
-waittime = 0 ;
-tatime = 0;
-resptime =0;
-type = scheme;
+    waittime = 0;
+    nJobs = 0;
+    waittime = 0 ;
+    tatime = 0;
+    resptime =0;
+    type = scheme;
 
 
-ncores = cores;
-float sojt = sizeof(job_t);
-float allocamount = ncores *sojt;
-jtarr = malloc(allocamount);
-int a;
-for (a =0; a < ncores; i++)
-{
-  jtarr[a] = 0;//NULL
-}
+    ncores = cores;
+    float sojt = sizeof(job_t);
+    float allocamount = ncores *sojt;
+    jtarr = malloc(allocamount);
+    int a;
+    for (a =0; a < ncores; a++)
+    {
+      jtarr[a] = 0;//NULL
+    }
 
-
+    //priqueue_init(Queue);
 
 
 }

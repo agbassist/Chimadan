@@ -32,10 +32,15 @@ int main()
 
 	/* Add 5 values, 3 unique. */
 	priqueue_offer(&q, &values[12]);
-	priqueue_offer(&q, &values[13]);
+	priqueue_print(&q);
+	priqueue_offer(&q, &values[15]);
+	priqueue_print(&q);
 	priqueue_offer(&q, &values[14]);
+	priqueue_print(&q);
 	priqueue_offer(&q, &values[12]);
+	priqueue_print(&q);
 	priqueue_offer(&q, &values[12]);
+	priqueue_print(&q);
 	printf("Total elements: %d (expected 5).\n", priqueue_size(&q));
 
 	int val = *((int *)priqueue_poll(&q));
@@ -47,8 +52,11 @@ int main()
 	printf("Total elements: %d (expected 2).\n", priqueue_size(&q));
 
 	priqueue_offer(&q, &values[10]);
+	priqueue_print(&q);
 	priqueue_offer(&q, &values[30]);
+	priqueue_print(&q);
 	priqueue_offer(&q, &values[20]);
+	priqueue_print(&q);
 
 	priqueue_offer(&q2, &values[10]);
 	priqueue_offer(&q2, &values[30]);

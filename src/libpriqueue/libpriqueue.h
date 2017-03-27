@@ -20,6 +20,7 @@ typedef struct _priqueue_t
 {
     size_t size;
     task_t * head;
+    int(*comparer)(const void *, const void *);
 
 } priqueue_t;
 

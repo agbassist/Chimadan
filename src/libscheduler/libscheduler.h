@@ -7,8 +7,6 @@
 /**
   Constants which represent the different scheduling algorithms
 */
-job_t ** jtarr;
-
 
 float ncores;
 float nJobs;

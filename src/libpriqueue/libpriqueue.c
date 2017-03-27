@@ -21,6 +21,7 @@ void priqueue_init(priqueue_t *q, int(*comparer)(const void *, const void *))
 {
     q->size = 0;
     q->head = NULL;
+    q->comparer = comparer;
 }
 
 
@@ -40,15 +41,38 @@ int priqueue_offer(priqueue_t *q, void *ptr)
     }
     else{
         task_t * temp = q->head;
+        task_t * placeholder = q->head;
 
         while(temp->next != NULL){
+            printf("%d\n",q->comparer(ptr,temp->ptr));
+            if(q->comparer(ptr,temp->ptr) < 0){
+
+                if(temp == q->head){
+                    q->head = malloc(sizeof(task_t));
+                    q->head->ptr = ptr;
+                    q->head->next = temp;
+                }
+                else{
+                    placeholder->next = malloc(sizeof(task_t));
+                    placeholder = placeholder->next;
+                    placeholder->ptr = ptr;
+                    placeholder->next = temp;
+                }
+
+                break; //if the right place is found, no need to continue while loop
+            }
+
+            placeholder = temp;
             temp = temp->next;
         }
 
-        //now temp->next points to NULL at the end
-        temp->next = malloc(sizeof(task_t));
-        temp->next->ptr = ptr;
-        temp->next->next = NULL;
+        if(temp->next == NULL){
+            //if it gets to the end of the queue
+            temp->next = malloc(sizeof(task_t));
+            temp->next->ptr = ptr;
+            temp->next->next = NULL;
+        }
+
     }
     q->size++;
     return q->size;
