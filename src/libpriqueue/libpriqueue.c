@@ -43,8 +43,7 @@ int priqueue_offer(priqueue_t *q, void *ptr)
         task_t * temp = q->head;
         task_t * placeholder = q->head;
 
-        while(temp->next != NULL){
-            printf("%d\n",q->comparer(ptr,temp->ptr));
+        while(temp != NULL){
             if(q->comparer(ptr,temp->ptr) < 0){
 
                 if(temp == q->head){
@@ -66,11 +65,12 @@ int priqueue_offer(priqueue_t *q, void *ptr)
             temp = temp->next;
         }
 
-        if(temp->next == NULL){
+        if(temp == NULL){
             //if it gets to the end of the queue
-            temp->next = malloc(sizeof(task_t));
-            temp->next->ptr = ptr;
-            temp->next->next = NULL;
+            temp = malloc(sizeof(task_t));
+            temp->ptr = ptr;
+            temp->next = NULL;
+            placeholder->next = temp;
         }
 
     }
@@ -167,6 +167,12 @@ int priqueue_remove(priqueue_t *q, void *ptr)
         int count = 0; //used to count how many have been removed
 
         while(temp != NULL){ //while temp is not at the end
+            printf("The values being compared are: ");
+            printf("%i", *(int *)ptr);
+            printf(" , ");
+            printf("%i\n", *(int *)(temp->ptr));
+
+            priqueue_print(q);
 
             if(temp->ptr == ptr){ //if we have a match
 
@@ -177,13 +183,17 @@ int priqueue_remove(priqueue_t *q, void *ptr)
                     prev->next = temp->next;
                 }
                 free(temp);
-                temp = prev;
+                temp = q->head;
+                prev = q->head;
                 q->size--;
                 count++;
             }
+            else{
+                prev = temp;
+                temp = temp->next;
+            }
 
-            prev = temp;
-            temp = temp->next;
+
         }
 
         return count;
@@ -219,6 +229,7 @@ void *priqueue_remove_at(priqueue_t *q, int index)
         prev->next = temp->next;
     }
 
+    q->size--;
     return temp;
 }
 
@@ -242,7 +253,9 @@ int priqueue_size(priqueue_t *q)
  */
 void priqueue_destroy(priqueue_t *q)
 {
-    for(int i=0; i <= q->size; i++) priqueue_remove(q, 0);
+    while(q->head != NULL){
+         priqueue_poll(q);
+    }
 }
 
 void priqueue_print(priqueue_t *q)

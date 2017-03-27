@@ -14,6 +14,8 @@
 
   You may need to define some global variables or a struct to store your job queue elements.
 */
+priqueue_t Q;
+
 typedef struct _job_t
 {
   int pid;
@@ -32,11 +34,11 @@ priqueue_t Queue;
 
 int ShortestJobFirst(void * x, void * y)
 {
-  if( *(job_t*).ptime > *(job_t*).ptime) //if the first arrived later return the second
+  if( (*(job_t*)x).ptime > (*(job_t*)y).ptime) //if the first arrived later return the second
   {
     return 1;
   }
-  else if (*(job_t*).ptime < *(job_t*).ptime)// if the first arrived earlier return the first
+  else if ((*(job_t*)x).ptime < (*(job_t*)y).ptime)// if the first arrived earlier return the first
   {
     return -1;
   }
@@ -46,23 +48,23 @@ int ShortestJobFirst(void * x, void * y)
   }
 
 }
-int PriorityFirst(void * x, void * b)
+int PriorityFirst(void * x, void * y)
 {
-  if( *(job_t*).prior > *(job_t*).prior) //If the first has a larger priority value, return the second
+  if( (*(job_t*)x).prior > (*(job_t*)y).prior) //If the first has a larger priority value, return the second
   {
     return 1;
   }
-  else if ( *(job_t*).prior < *(job_t*).prior)// If the first has a lower priority value, return the first
+  else if ( (*(job_t*)x).prior < (*(job_t*)y).prior)// If the first has a lower priority value, return the first
   {
     return -1;
   }
   else
   {
-    if( *(job_t*).ptime > *(job_t*).ptime) //if the first arrived later return the second
+    if( (*(job_t*)x).ptime > (*(job_t*)y).ptime) //if the first arrived later return the second
     {
       return 1;
     }
-    else if (*(job_t*).ptime < *(job_t*).ptime)// if the first arrived earlier return the first
+    else if ((*(job_t*)x).ptime < (*(job_t*)y).ptime)// if the first arrived earlier return the first
     {
       return -1;
     }
@@ -188,11 +190,11 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
 int scheduler_job_finished(int core_id, int job_number, int time)
 {
   //update the number of jobs
-  njobs = njobs + 1;
+  //njobs = njobs + 1;
   //update the average times
-  tjarr[core_id]
+  //tjarr[core_id]
 
-  waittime
+  //waittime
 
 
 
@@ -215,7 +217,7 @@ int scheduler_job_finished(int core_id, int job_number, int time)
  */
 int scheduler_quantum_expired(int core_id, int time)
 {
-  job_t
+ // job_t
 }
 
 
@@ -300,5 +302,6 @@ void scheduler_clean_up()
  */
 void scheduler_show_queue()
 {
+    return 0;
 
 }
