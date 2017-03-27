@@ -16,6 +16,13 @@
 */
 typedef struct _job_t
 {
+  int pid;
+  float atime;
+  float prior;
+  float otime;
+  float ptime;
+  float rtime;
+  float ltime;
 
 } job_t;
 
