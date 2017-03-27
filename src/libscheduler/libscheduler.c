@@ -19,12 +19,12 @@ priqueue_t Q;
 typedef struct _job_t
 {
   int pid;
-  float atime;
-  float prior;
-  float optime;
-  float ptime;
-  float rtime;
-  float ltime;
+  int atime;
+  int prior;
+  int runtime;
+  int ptime;
+  int rtime;
+  int ltime;
 
 } job_t;
 
@@ -81,6 +81,22 @@ int FirstComeFirstServe(void * a, void * b)
 {
     return 1;
 }
+
+int scheduler_core_available()
+{
+  int a = 0;
+  while( a < ncores  )
+  {
+    if(jtarr[a] ==  NULL)
+    {
+      return a;
+    }
+    a++;
+  }
+
+  return -1;
+}
+
 /**
   Initalizes the scheduler.
 
@@ -132,8 +148,8 @@ void scheduler_start_up(int cores, scheme_t scheme)
 
 
     ncores = cores;
-    float sojt = sizeof(job_t);
-    float allocamount = ncores *sojt;
+    int sojt = sizeof(job_t);
+    int allocamount = ncores *sojt;
     jtarr = malloc(allocamount);
     int a;
     for (a =0; a < ncores; a++)
@@ -169,7 +185,19 @@ void scheduler_start_up(int cores, scheme_t scheme)
  */
 int scheduler_new_job(int job_number, int time, int running_time, int priority)
 {
-	return -1;
+	job_t* newjob = malloc(sizeof(job_t));
+    newjob->prior = priority;
+    newjob->runtime = running_time;
+    newjob->ptime = running_time;
+    newjob->rtime = 0;
+    newjob->atime = time;
+    newjob->pid = job_number;
+
+    int coreavailable = scheduler_core_available();
+
+
+    //if(coreavailable )
+
 }
 
 
