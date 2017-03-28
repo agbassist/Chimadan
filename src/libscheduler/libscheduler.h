@@ -10,9 +10,9 @@
 
 float ncores;
 float nJobs;
-float waittime;
-float tatime;
-float resptime;
+float wait_time;
+float turnaround_time;
+float response_time; //used to store the sum of response times for completed jobs
 
 typedef enum {FCFS = 0, SJF, PSJF, PRI, PPRI, RR} scheme_t;
 
