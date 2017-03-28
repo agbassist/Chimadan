@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <stdbool.h>
 
 #include "libscheduler.h"
 #include "../libpriqueue/libpriqueue.h"
@@ -98,6 +99,18 @@ int PriorityFirst(const void * x, const void * y)
 int FirstComeFirstServe(const void * a, const void * b)
 {
     return 1;
+}
+
+bool hasjobfinished(job_t * job)
+{
+  if (job->time_remaining == job->runtime)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 int scheduler_core_available(job_t* newjob)
@@ -306,6 +319,23 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
       priority_vals = Max_Priority_Finder();
       remaining_time_vals = Remaining_time_finder(time);
 
+      if ( scheme == PPRI)
+      {
+        if( newjob->priority < priority_vals.max_priority_num)
+        {
+          job_t * current_job = corearr[priority_vals.max_priority_index];
+          int temp_time = time - current_job->start_time;
+          int newtime = current_job->time_remaining - temp_time;
+          current_job->time_remaining = newtime;
+          if (hasjobfinished(current_job))
+          {
+            response_time += -1 *( time - current_job->arrival_time);
+          }
+          priqueue_offer(&Q, current_job);
+          new_job->start_time = time;
+          return priority_vals.max_priority_index;
+        }
+      }
 
 
 
