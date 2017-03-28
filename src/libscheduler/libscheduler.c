@@ -372,6 +372,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
 
 
       if(type == PSJF){
+        printf("\n%s\n","22" );
           if(newjob->start_time < remaining_time_vals.max_remaining_time_num){
               //condense variable name
               int max_rti = remaining_time_vals.max_remaining_time_index;
@@ -393,6 +394,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
       if ( type == PPRI)
 
       {
+        printf("\n%s\n","23" );
         if( newjob->priority < priority_vals.max_priority_num)
         {
           job_t * current_job = corearr[priority_vals.max_priority_index];
@@ -411,6 +413,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
 
     }
   printf("\n%s\n","8" );
+  	priqueue_offer(&Q, newjob);
     return -1;
 
 }
@@ -434,13 +437,14 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
 int scheduler_job_finished(int core_id, int job_number, int time)
 {
     //Grab the finished job from the core
-      printf("\n%s\n","6" );
+    printf("\n%s\n","6" );
     job_t* finished_job = corearr[core_id];
 
     //Calculate the different time measurements from the finished job
     wait_time       += time - finished_job->runtime - finished_job->arrival_time;
     turnaround_time += time - finished_job->arrival_time;
     response_time   += finished_job->start_time - finished_job->arrival_time;
+    nJobs += nJobs + 1;
 
     //Cleanup the job
     free(finished_job);
@@ -448,6 +452,7 @@ int scheduler_job_finished(int core_id, int job_number, int time)
 
     //Schedule the next job to the core
     if(priqueue_peek(&Q) != NULL){ //Check if the Queue is empty
+        printf("\n%s\n","24" );
 
         //Grab the job at the top of the queue and add it to the core
         job_t* new_job = priqueue_poll(&Q);
@@ -456,6 +461,7 @@ int scheduler_job_finished(int core_id, int job_number, int time)
         return new_job->job_number;
     }
     else{ //if the Queue is empty, the core remains idle
+        printf("\n%s\n","25" );
         return -1;
     }
       printf("\n%s\n","7" );
@@ -577,6 +583,6 @@ void scheduler_clean_up()
  */
 void scheduler_show_queue()
 {
-    return 0;
+    priqueue_print(&Q);
 
 }
