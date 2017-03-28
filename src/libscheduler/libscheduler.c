@@ -340,7 +340,6 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
    	job_t* newjob = malloc(sizeof(job_t));
     newjob->priority = priority;
     newjob->runtime = running_time;
-
     newjob->time_remaining = running_time;
     newjob->start_time = 0;
     newjob->arrival_time = time;
@@ -577,6 +576,9 @@ void scheduler_clean_up()
  */
 void scheduler_show_queue()
 {
-    return 0;
+
+        job_t* temp = priqueue_at(&Q,0);
+        printf("%d(%d) ",temp->job_number,temp->priority);
+
 
 }
