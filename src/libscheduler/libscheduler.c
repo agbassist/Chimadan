@@ -18,27 +18,26 @@ priqueue_t Q;
 
 typedef struct _job_t
 {
-  int pid;
-  int atime;
-  int prior;
-  int runtime;
-  int ptime;
-  int rtime;
-  int ltime;
-
+  int job_number;       //job id
+  int arrival_time;     //time arrived at the queue
+  int prioriy;          //priority of the job
+  int runtime;          //total time for the job to complete
+  int time_remaining;   //time remaining before the job finishes
+  int time_added;       //time added to the core
 } job_t;
 
-job_t ** jtarr;
+
+job_t ** jtarr; // job task array
 
 priqueue_t Queue;
 
 int ShortestJobFirst(void * x, void * y)
 {
-  if( (*(job_t*)x).ptime > (*(job_t*)y).ptime) //if the first arrived later return the second
+  if( (*(job_t*)x).process_time > (*(job_t*)y).process_time) //if the first arrived later return the second
   {
     return 1;
   }
-  else if ((*(job_t*)x).ptime < (*(job_t*)y).ptime)// if the first arrived earlier return the first
+  else if ((*(job_t*)x).process_time < (*(job_t*)y).process_time)// if the first arrived earlier return the first
   {
     return -1;
   }
@@ -50,21 +49,21 @@ int ShortestJobFirst(void * x, void * y)
 }
 int PriorityFirst(void * x, void * y)
 {
-  if( (*(job_t*)x).prior > (*(job_t*)y).prior) //If the first has a larger priority value, return the second
+  if( (*(job_t*)x).prioriy > (*(job_t*)y).prioriy) //If the first has a larger priority value, return the second
   {
     return 1;
   }
-  else if ( (*(job_t*)x).prior < (*(job_t*)y).prior)// If the first has a lower priority value, return the first
+  else if ( (*(job_t*)x).prioriy < (*(job_t*)y).prioriy)// If the first has a lower priority value, return the first
   {
     return -1;
   }
   else
   {
-    if( (*(job_t*)x).ptime > (*(job_t*)y).ptime) //if the first arrived later return the second
+    if( (*(job_t*)x).process_time > (*(job_t*)y).process_time) //if the first arrived later return the second
     {
       return 1;
     }
-    else if ((*(job_t*)x).ptime < (*(job_t*)y).ptime)// if the first arrived earlier return the first
+    else if ((*(job_t*)x).process_time < (*(job_t*)y).process_time)// if the first arrived earlier return the first
     {
       return -1;
     }
@@ -111,41 +110,37 @@ int scheduler_core_available()
 */
 void scheduler_start_up(int cores, scheme_t scheme)
 {
-  //assign the type of comprison with the initialization of the queue
-  if(scheme == FCFS)
-  {
-  prequeue_init(&Q, FirstComeFirstServe);
-  }
-  if(scheme == RR)
-  {
-    prequeue_init(&Q, FirstComeFirstServe);
-  }
-  if(scheme == SJF)
-  {
-    prequeue_init(&Q, ShortestJobFirst);
-  }
-  if(scheme == PSJF)
-  {
-    prequeue_init(&Q, ShortestJobFirst);
-  }
-  if(scheme == PRI)
-  {
-    priqueue_init(&Q, PriorityFirst);
-  }
-  if(scheme == PPRI)
-  {
-    priqueue_init(&Q, PriorityFirst);
-  }
-
-
+    //assign the type of comprison with the initialization of the queue
+    if(scheme == FCFS)
+    {
+        prequeue_init(&Q, FirstComeFirstServe);
+    }
+    if(scheme == RR)
+    {
+        prequeue_init(&Q, FirstComeFirstServe);
+    }
+    if(scheme == SJF)
+    {
+        prequeue_init(&Q, ShortestJobFirst);
+    }
+    if(scheme == PSJF)
+    {
+        prequeue_init(&Q, ShortestJobFirst);
+    }
+    if(scheme == PRI)
+    {
+        priqueue_init(&Q, PriorityFirst);
+    }
+    if(scheme == PPRI)
+    {
+        priqueue_init(&Q, PriorityFirst);
+    }
 
     waittime = 0;
     nJobs = 0;
-    waittime = 0 ;
     tatime = 0;
     resptime =0;
     type = scheme;
-
 
     ncores = cores;
     int sojt = sizeof(job_t);
@@ -158,7 +153,6 @@ void scheduler_start_up(int cores, scheme_t scheme)
     }
 
     //priqueue_init(Queue);
-
 
 }
 
@@ -186,15 +180,14 @@ void scheduler_start_up(int cores, scheme_t scheme)
 int scheduler_new_job(int job_number, int time, int running_time, int priority)
 {
 	job_t* newjob = malloc(sizeof(job_t));
-    newjob->prior = priority;
+    newjob->priority = priority;
     newjob->runtime = running_time;
-    newjob->ptime = running_time;
-    newjob->rtime = 0;
-    newjob->atime = time;
+    newjob->process_time = running_time;
+    newjob->response_time = 0;
+    newjob->arrival_time = time;
     newjob->pid = job_number;
 
     int coreavailable = scheduler_core_available();
-
 
     //if(coreavailable )
 
@@ -204,7 +197,8 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
 /**
   Called when a job has completed execution.
 
-  The core_id, job_number and time parameters are provided for convenience. You may be able to calculate the values with your own data structure.
+  The core_id, job_number and time parameters are provided for convenience.
+  You may be able to calculate the values with your own data structure.
   If any job should be scheduled to run on the core free'd up by the
   finished job, return the job_number of the job that should be scheduled to
   run on core core_id.
@@ -222,9 +216,9 @@ int scheduler_job_finished(int core_id, int job_number, int time)
   //update the average times
   //tjarr[core_id]
 
-  //waittime
+  job_t* finished_job = jtarr[core_id];
 
-
+    waittime = time - finished_job->arrival_time;
 
 	return -1;
 }
