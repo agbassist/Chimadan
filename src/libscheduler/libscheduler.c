@@ -507,23 +507,34 @@ int scheduler_job_finished(int core_id, int job_number, int time)
  */
 int scheduler_quantum_expired(int core_id, int time)
 {
-    job_t * temp_job = corearr[core_id];
 
-    temp_job->time_remaining -= time - temp_job->start_time;
+    priqueue_offer(&Q,corearr[core_id]);
+    job_t * current_job = priqueue_poll(&Q);
 
-    if(priqueue_peek(&Q) != NULL){ //Check if the Queue is empty
+    if(current_job != NULL){ //Check if the Queue is empty
+      corearr[core_id]->time_remaining -= time - corearr[core_id]->start_time;
+      //Add the expired job to the queue, and schedule the next job on the queue
+      //remaining
+      //temp_job = priqueue_poll(&Q);
+      current_job->start_time = time;
+      corearr[core_id]= current_job;
 
-        //Add the expired job to the queue, and schedule the next job on the queue
-        priqueue_offer(&Q,temp_job);
-        temp_job = priqueue_poll(&Q);
-        temp_job->start_time = time;
-        corearr[core_id]= temp_job;
-        return temp_job->job_number;
-    }
+      if(current_job->time_remaining - current_job->runtime == 0)
+      {
+        response_time -= (time - current_job->arrival_time);
+      }
+
+      return current_job->job_number;
+
+}
     else{
-        //Return -1 if the Queue is empty and remain idle
-        return -1;
-    }
+
+      corearr[core_id]->time_remaining -= time - corearr[core_id]->start_time;
+      //Return -1 if the Queue is empty and remain idle
+      return -1;
+  }
+
+
 
 }
 
