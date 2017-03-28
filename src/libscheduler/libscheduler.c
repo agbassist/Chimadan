@@ -33,11 +33,11 @@ priqueue_t Queue;
 
 int ShortestJobFirst(void * x, void * y)
 {
-  if( (*(job_t*)x).process_time > (*(job_t*)y).process_time) //if the first arrived later return the second
+  if( (*(job_t*)x).runtime > (*(job_t*)y).runtime) //if the first arrived later return the second
   {
     return 1;
   }
-  else if ((*(job_t*)x).process_time < (*(job_t*)y).process_time)// if the first arrived earlier return the first
+  else if ((*(job_t*)x).runtime < (*(job_t*)y).runtime)// if the first arrived earlier return the first
   {
     return -1;
   }
@@ -59,11 +59,11 @@ int PriorityFirst(void * x, void * y)
   }
   else
   {
-    if( (*(job_t*)x).process_time > (*(job_t*)y).process_time) //if the first arrived later return the second
+    if( (*(job_t*)x).runtime > (*(job_t*)y).runtime) //if the first arrived later return the second
     {
       return 1;
     }
-    else if ((*(job_t*)x).process_time < (*(job_t*)y).process_time)// if the first arrived earlier return the first
+    else if ((*(job_t*)x).runtime < (*(job_t*)y).runtime)// if the first arrived earlier return the first
     {
       return -1;
     }
@@ -182,10 +182,10 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
 	job_t* newjob = malloc(sizeof(job_t));
     newjob->priority = priority;
     newjob->runtime = running_time;
-    newjob->process_time = running_time;
+    newjob->time_remaining = running_time;
     newjob->response_time = 0;
-    newjob->arrival_time = time;
-    newjob->pid = job_number;
+    newjob->time_added = time;
+    newjob->job_number = job_number;
 
     int coreavailable = scheduler_core_available();
 
