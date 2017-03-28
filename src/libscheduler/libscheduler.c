@@ -18,6 +18,7 @@
 */
 priqueue_t Q;
 
+
 typedef struct
 {
   int max_priority_num;
@@ -50,11 +51,26 @@ typedef struct _job_t
 job_t ** corearr; // job task array
 
 priqueue_t Queue;
+int printtime()
+{
+  time_t rawtime;
+  struct tm * timeinfo;
+
+  time ( &rawtime );
+  timeinfo = localtime ( &rawtime );
+  printf("\n\n\n\n\n\n\n");
+  printf ( "Current local time and date: %s", asctime (timeinfo) );
+  return 1;
+}
+
+printtime();
+
 
 int ShortestJobFirst(const void * x, const void * y)
 {
   if( (*(job_t*)x).runtime > (*(job_t*)y).runtime) //if the first arrived later return the second
   {
+    printf("\n\n\n\n\n\n111111111111111111\n\n\n\n\n\n");
     return 1;
   }
   else if ((*(job_t*)x).runtime < (*(job_t*)y).runtime)// if the first arrived earlier return the first
@@ -132,14 +148,24 @@ int scheduler_core_available(job_t* newjob)
 max_priority_vals Max_Priority_Finder(job_t* newjob)
 {
   int a = 0;
+  printf("\n%s\n","15" );
   max_priority_vals returnvals;
   returnvals.max_priority_num = INT_MIN;
   returnvals.max_priority_index = INT_MIN;
   returnvals.max_priority_pid = INT_MIN;
+
+    printf("\n%s\n","16" );
+    //int b = corearr[1]->priority;
+    //printf("%s %i\n","cores:",ncores );
   while( a < ncores  )
   {
+      printf("%s %i\n","maxvalue:",returnvals.max_priority_num );
+      printf("%s %i\n","cores:",ncores );
+      printf("%s %i\n","a:",a );
+      printf("\n%s\n","17" );
     if(corearr[a]->priority > returnvals.max_priority_num)
     {
+      printf("\n%s\n","19" );
       returnvals.max_priority_num = corearr[a]->priority;
       returnvals.max_priority_index = corearr[a]->job_number;
       returnvals.max_priority_pid = a;
@@ -148,8 +174,10 @@ max_priority_vals Max_Priority_Finder(job_t* newjob)
     }
     else if (corearr[a]->priority == returnvals.max_priority_num)
     {
+      printf("\n%s\n","20" );
         if(corearr[a]->job_number > returnvals.max_priority_pid)
         {
+          printf("\n%s\n","21" );
           returnvals.max_priority_num = corearr[a]->priority;
           returnvals.max_priority_index = a;
           returnvals.max_priority_pid = corearr[a]->job_number;
@@ -161,6 +189,7 @@ max_priority_vals Max_Priority_Finder(job_t* newjob)
     }
     a++;
   }
+  printf("%s\n","18" );
 
   return returnvals;
 }
@@ -226,6 +255,8 @@ max_remaining_time_vals Remaining_time_finder(int time)
 */
 void scheduler_start_up(int cores, scheme_t scheme)
 {
+  printf("\n%s\n","3" );
+//printf("%s %n\n","Cores amount:", cores );
     //assign the type of comprison with the initialization of the queue
     if(scheme == FCFS)
     {
@@ -259,14 +290,23 @@ void scheduler_start_up(int cores, scheme_t scheme)
     type = scheme;
 
     ncores = cores;
+    printf("%s %d\n","cores:",cores );
     int sojt = sizeof(job_t);
+      printf("%s %d\n","sojt:",sojt );
     int allocamount = ncores *sojt;
-    corearr = malloc(allocamount);
+    printf("%s %d\n","allocamount:",allocamount );
+    corearr = (job_t**)malloc(allocamount);
     int a;
     for (a =0; a < ncores; a++)
     {
+        printf("%s %d\n","a:",a );
       corearr[a] = NULL;//NULL
     }
+
+      printf("\n%s\n","4" );
+
+
+
 
     //priqueue_init(Queue);
 
@@ -295,7 +335,9 @@ void scheduler_start_up(int cores, scheme_t scheme)
  */
 int scheduler_new_job(int job_number, int time, int running_time, int priority)
 {
-	job_t* newjob = malloc(sizeof(job_t));
+    printf("\n%s\n","5" );
+
+   	job_t* newjob = malloc(sizeof(job_t));
     newjob->priority = priority;
     newjob->runtime = running_time;
 
@@ -307,17 +349,26 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
 
     max_remaining_time_vals remaining_time_vals;
     max_priority_vals priority_vals;
+      printf("\n%s\n","9" );
 
 
     int resp = scheduler_core_available(newjob);
-    if (resp == -1 )
+    printf("\n%s %i\n","resp:",resp );
+
+      printf("\n%s\n","10" );
+    if (resp != -1 )
     {
+        printf("\n%s\n","11" );
+        return resp;
       //the new job has been added
     }
     else
     {
+        printf("\n%s\n","12" );
       priority_vals = Max_Priority_Finder(newjob);
+        printf("\n%s\n","14" );
       remaining_time_vals = Remaining_time_finder(time);
+        printf("\n%s\n","13" );
 
 
       if(type == PSJF){
@@ -359,7 +410,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
       }
 
     }
-
+  printf("\n%s\n","8" );
     return -1;
 
 }
@@ -383,6 +434,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
 int scheduler_job_finished(int core_id, int job_number, int time)
 {
     //Grab the finished job from the core
+      printf("\n%s\n","6" );
     job_t* finished_job = corearr[core_id];
 
     //Calculate the different time measurements from the finished job
@@ -406,6 +458,7 @@ int scheduler_job_finished(int core_id, int job_number, int time)
     else{ //if the Queue is empty, the core remains idle
         return -1;
     }
+      printf("\n%s\n","7" );
 }
 
 

@@ -8,11 +8,11 @@
   Constants which represent the different scheduling algorithms
 */
 
-float ncores;
-float nJobs;
-float wait_time;
-float turnaround_time;
-float response_time; //used to store the sum of response times for completed jobs
+int ncores;
+int nJobs;
+int wait_time;
+int turnaround_time;
+int response_time; //used to store the sum of response times for completed jobs
 
 typedef enum {FCFS = 0, SJF, PSJF, PRI, PPRI, RR} scheme_t;
 

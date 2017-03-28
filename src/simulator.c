@@ -88,8 +88,11 @@ int main(int argc, char **argv)
 	/*
 	 * Parse command line options.
 	 */
+
+
 	while ((c = getopt(argc, argv, "c:s:")) != -1)
 	{
+
 		switch (c)
 		{
 			case 'c':
