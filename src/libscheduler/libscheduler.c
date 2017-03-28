@@ -316,10 +316,10 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
     }
     else
     {
-      priority_vals = Max_Priority_Finder();
+      priority_vals = Max_Priority_Finder(newjob);
       remaining_time_vals = Remaining_time_finder(time);
 
-      if ( scheme == PPRI)
+      if ( type == PPRI)
       {
         if( newjob->priority < priority_vals.max_priority_num)
         {
@@ -332,7 +332,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
             response_time += -1 *( time - current_job->arrival_time);
           }
           priqueue_offer(&Q, current_job);
-          new_job->start_time = time;
+          newjob->start_time = time;
           return priority_vals.max_priority_index;
         }
       }
@@ -407,7 +407,7 @@ int scheduler_job_finished(int core_id, int job_number, int time)
  */
 int scheduler_quantum_expired(int core_id, int time)
 {
-    job_t * temp_job = jtarr[core_id];
+    job_t * temp_job = corearr[core_id];
 
     if(priqueue_peek(&Q) != NULL){ //Check if the Queue is empty
 
@@ -415,7 +415,7 @@ int scheduler_quantum_expired(int core_id, int time)
         priqueue_offer(&Q,temp_job);
         temp_job = priqueue_poll(&Q);
         temp_job->start_time = time;
-        jtarr[core_id]= temp_job;
+        corearr[core_id]= temp_job;
         return temp_job->job_number;
     }
     else{
