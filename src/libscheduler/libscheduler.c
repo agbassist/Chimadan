@@ -293,7 +293,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
 
 
     max_remaining_time_vals remaining_time_vals;
-    max_priority_vals priotity_vals;
+    max_priority_vals priority_vals;
 
 
     int resp = scheduler_core_available(newjob);
@@ -303,6 +303,14 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
     }
     else
     {
+      priority_vals = Max_Priority_Finder();
+      remaining_time_vals = Remaining_time_finder(time);
+
+
+
+
+
+
 
     }
     //if(coreavailable )
