@@ -306,14 +306,28 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
       priority_vals = Max_Priority_Finder();
       remaining_time_vals = Remaining_time_finder(time);
 
+      if(scheme == PSJF){
+          if(newjob->start_time < remaining_time_vals){
+              //condense variable name
+              int max_rti = remaining_time_vals.max_remaining_time_index;
 
+              //Grab job from the right core and calculate the time remaining until completion
+              job_t* temp = corearr[max_rti];
+              temp->time_remaining = temp-> time_remaining - time - temp->start_time;
 
-
-
-
+              if(temp->time_remaining == temp->runtime){
+                  response_time = response_time - time - temp->arrival_time;
+              }
+              priqueue_offer(&Q,temp);
+              corearr[max_rti] = temp;
+              temp->start_time = time;
+              return max_rti;
+          }
+      }
 
     }
-    //if(coreavailable )
+
+    return -1;
 
 }
 
@@ -377,7 +391,7 @@ int scheduler_job_finished(int core_id, int job_number, int time)
  */
 int scheduler_quantum_expired(int core_id, int time)
 {
-    job_t * temp_job = jtarr[core_id];
+    job_t * temp_job = corearr[core_id];
 
     if(priqueue_peek(&Q) != NULL){ //Check if the Queue is empty
 
