@@ -37,10 +37,11 @@ typedef struct _job_t
 {
   int job_number;       //job id
   int arrival_time;     //time arrived at the queue
-  int prioriy;          //priority of the job
+  int priority;         //priority of the job
   int runtime;          //total time for the job to complete
   int time_remaining;   //time remaining before the job finishes
-  int time_added;       //time added to the core
+  int start_time;       //time that the job is added to the core and started
+
 } job_t;
 
 
@@ -48,7 +49,7 @@ job_t ** corearr; // job task array
 
 priqueue_t Queue;
 
-int ShortestJobFirst(void * x, void * y)
+int ShortestJobFirst(const void * x, const void * y)
 {
   if( (*(job_t*)x).runtime > (*(job_t*)y).runtime) //if the first arrived later return the second
   {
@@ -64,13 +65,13 @@ int ShortestJobFirst(void * x, void * y)
   }
 
 }
-int PriorityFirst(void * x, void * y)
+int PriorityFirst(const void * x, const void * y)
 {
-  if( (*(job_t*)x).prioriy > (*(job_t*)y).prioriy) //If the first has a larger priority value, return the second
+  if( (*(job_t*)x).priority > (*(job_t*)y).priority) //If the first has a larger priority value, return the second
   {
     return 1;
   }
-  else if ( (*(job_t*)x).prioriy < (*(job_t*)y).prioriy)// If the first has a lower priority value, return the first
+  else if ( (*(job_t*)x).priority < (*(job_t*)y).priority)// If the first has a lower priority value, return the first
   {
     return -1;
   }
@@ -93,7 +94,7 @@ int PriorityFirst(void * x, void * y)
   }
 
 }
-int FirstComeFirstServe(void * a, void * b)
+int FirstComeFirstServe(const void * a, const void * b)
 {
     return 1;
 }
@@ -213,19 +214,19 @@ void scheduler_start_up(int cores, scheme_t scheme)
     //assign the type of comprison with the initialization of the queue
     if(scheme == FCFS)
     {
-        prequeue_init(&Q, FirstComeFirstServe);
+        priqueue_init(&Q, FirstComeFirstServe);
     }
     if(scheme == RR)
     {
-        prequeue_init(&Q, FirstComeFirstServe);
+        priqueue_init(&Q, FirstComeFirstServe);
     }
     if(scheme == SJF)
     {
-        prequeue_init(&Q, ShortestJobFirst);
+        priqueue_init(&Q, ShortestJobFirst);
     }
     if(scheme == PSJF)
     {
-        prequeue_init(&Q, ShortestJobFirst);
+        priqueue_init(&Q, ShortestJobFirst);
     }
     if(scheme == PRI)
     {
@@ -236,10 +237,10 @@ void scheduler_start_up(int cores, scheme_t scheme)
         priqueue_init(&Q, PriorityFirst);
     }
 
-    waittime = 0;
+    wait_time = 0;
+    turnaround_time = 0;
+    response_time =0;
     nJobs = 0;
-    tatime = 0;
-    resptime =0;
     type = scheme;
 
     ncores = cores;
@@ -282,6 +283,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
 	job_t* newjob = malloc(sizeof(job_t));
     newjob->priority = priority;
     newjob->runtime = running_time;
+
     newjob->time_remaining = running_time;
     newjob->time_added = 0;
     newjob->arrival_time = time;
@@ -323,16 +325,30 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
  */
 int scheduler_job_finished(int core_id, int job_number, int time)
 {
-  //update the number of jobs
-  //njobs = njobs + 1;
-  //update the average times
-  //tjarr[core_id]
+    //Grab the finished job from the core
+    job_t* finished_job = jtarr[core_id];
 
-  job_t* finished_job = jtarr[core_id];
+    //Calculate the different time measurements from the finished job
+    wait_time       += time - finished_job->runtime - finished_job->arrival_time;
+    turnaround_time += time - finished_job->arrival_time;
+    response_time   += finished_job->start_time - finished_job->arrival_time;
 
-    waittime = time - finished_job->arrival_time;
+    //Cleanup the job
+    free(finished_job);
+    finished_job = NULL;
 
-	return -1;
+    //Schedule the next job to the core
+    if(priqueue_peek(&Q) != NULL){ //Check if the Queue is empty
+
+        //Grab the job at the top of the queue and add it to the core
+        job_t* new_job = priqueue_poll(&Q);
+        new_job->start_time = time;
+        jtarr[core_id] = new_job;
+        return new_job->job_number;
+    }
+    else{ //if the Queue is empty, the core remains idle
+        return -1;
+    }
 }
 
 
@@ -364,7 +380,7 @@ int scheduler_quantum_expired(int core_id, int time)
  */
 float scheduler_average_waiting_time()
 {
-  float sawt = waittime / nJobs;
+  float sawt = wait_time / nJobs;
 	return sawt;
 }
 
@@ -378,7 +394,7 @@ float scheduler_average_waiting_time()
  */
 float scheduler_average_turnaround_time()
 {
-  float avgtt = tatime / nJobs;
+  float avgtt = turnaround_time / nJobs;
 	return avgtt;
 }
 
@@ -392,7 +408,7 @@ float scheduler_average_turnaround_time()
  */
 float scheduler_average_response_time()
 {
-  float respavg = resptime / nJobs;
+  float respavg = response_time / nJobs;
 	return respavg;
 }
 
