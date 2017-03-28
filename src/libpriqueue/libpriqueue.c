@@ -104,7 +104,8 @@ void *priqueue_peek(priqueue_t *q)
  */
 void *priqueue_poll(priqueue_t *q)
 {
-    if(q->head == NULL){
+  task_t * temp = q->head;
+   if(temp == NULL){
         return NULL;
     }
     else{
@@ -115,8 +116,7 @@ void *priqueue_poll(priqueue_t *q)
         else{ //size of queue is 1
             q->head = NULL;
         }
-        void* data = malloc(sizeof(void));
-        memcpy(data, temp->ptr, sizeof(void));
+        void* data = temp->ptr;
         free(temp);
 
         q->size--;

@@ -444,6 +444,7 @@ int scheduler_job_finished(int core_id, int job_number, int time)
     //Calculate the different time measurements from the finished job
     wait_time       += time - finished_job->runtime - finished_job->arrival_time;
     turnaround_time += time - finished_job->arrival_time;
+    response_time += time - finished_job->runtime - finished_job->arrival_time;
 
   //  printf("\n%s %i\n","wait_time:",wait_time );
     nJobs = nJobs + 1;
