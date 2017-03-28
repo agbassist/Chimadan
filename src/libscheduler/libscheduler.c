@@ -167,8 +167,8 @@ max_priority_vals Max_Priority_Finder(job_t* newjob)
     {
       printf("\n%s\n","19" );
       returnvals.max_priority_num = corearr[a]->priority;
-      returnvals.max_priority_index = corearr[a]->job_number;
-      returnvals.max_priority_pid = a;
+      returnvals.max_priority_index =a;
+      returnvals.max_priority_pid =  corearr[a]->job_number;
 
 
     }
@@ -367,7 +367,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
         printf("\n%s\n","13" );
 
         if(type == PSJF){
-            
+
             //update the time remaining in the current core
             corearr[0]->time_remaining -= (time - corearr[0]->start_time);
             if(newjob->time_remaining < corearr[0]->time_remaining){
@@ -384,16 +384,34 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
         printf("\n%s\n","23" );
         if( newjob->priority < priority_vals.max_priority_num)
         {
+          printf("\n%s\n","24" );
           job_t * current_job = corearr[priority_vals.max_priority_index];
-          int temp_time = time - current_job->start_time;
+            printf("%s %d\n","priority_vals.max_priority_index:",priority_vals.max_priority_index );
+          //printf("\n%s\n","25" );
+          int temp_time;
+          printf("\n%s\n","33" );
+          temp_time = time - current_job->start_time;
+            printf("%s %d\n","priority_vals.max_priority_index:",priority_vals.max_priority_index );
+          //printf("\n%s\n","26" );
+
           int newtime = current_job->time_remaining - temp_time;
+          printf("\n%s\n","27" );
           current_job->time_remaining = newtime;
-          if ((current_job))
+          //printf("\n%s\n","28" );
+          if (hasjobfinished(current_job))
           {
+            printf("\n%s\n","29" );
             response_time += -1 *( time - current_job->arrival_time);
           }
+        //  printf("\n%s\n","30" );
+          priqueue_print(&Q);
+          printf("\n%s\n","40" );
           priqueue_offer(&Q, current_job);
+        //    printf("\n%s\n","41" );
+            priqueue_print(&Q);
+          printf("\n%s\n","31" );
           newjob->start_time = time;
+        //  printf("\n%s\n","32" );
           return priority_vals.max_priority_index;
         }
       }
@@ -442,8 +460,10 @@ int scheduler_job_finished(int core_id, int job_number, int time)
     corearr[core_id] = NULL;
 
     //Schedule the next job to the core
+
     if(priqueue_peek(&Q) != NULL){ //Check if the Queue is empty
-        printf("\n%s\n","24" );
+        printf("\n%s\n","37" );
+        //priqueue_print(&Q);
 
 
         //Grab the job at the top of the queue and add it to the core
@@ -478,6 +498,8 @@ int scheduler_job_finished(int core_id, int job_number, int time)
 int scheduler_quantum_expired(int core_id, int time)
 {
     job_t * temp_job = corearr[core_id];
+
+    temp_job->time_remaining -= time - temp_job->start_time;
 
     if(priqueue_peek(&Q) != NULL){ //Check if the Queue is empty
 
