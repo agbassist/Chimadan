@@ -267,6 +267,7 @@ void priqueue_destroy(priqueue_t *q)
 
 void priqueue_print(priqueue_t *q)
 {
+    printf("LOOK AT MEEEE I'M MR. MEESEEKS\n-----------------------------------\n");
   task_t* temp = q->head;
 
   if(temp != NULL) {
