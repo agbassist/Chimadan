@@ -167,12 +167,12 @@ int priqueue_remove(priqueue_t *q, void *ptr)
         int count = 0; //used to count how many have been removed
 
         while(temp != NULL){ //while temp is not at the end
-            printf("The values being compared are: ");
-            printf("%i", *(int *)ptr);
-            printf(" , ");
-            printf("%i\n", *(int *)(temp->ptr));
+            //printf("The values being compared are: ");
+            //printf("%i", *(int *)ptr);
+            //printf(" , ");
+            //printf("%i\n", *(int *)(temp->ptr));
 
-            priqueue_print(q);
+            //priqueue_print(q);
 
             if(temp->ptr == ptr){ //if we have a match
 
