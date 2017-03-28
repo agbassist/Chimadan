@@ -68,12 +68,12 @@ printtime();
 
 int ShortestJobFirst(const void * x, const void * y)
 {
-  if( (*(job_t*)x).runtime > (*(job_t*)y).runtime) //if the first arrived later return the second
+  if( (*(job_t*)x).time_remaining > (*(job_t*)y).time_remaining) //if the first arrived later return the second
   {
     printf("\n\n\n\n\n\n111111111111111111\n\n\n\n\n\n");
     return 1;
   }
-  else if ((*(job_t*)x).runtime < (*(job_t*)y).runtime)// if the first arrived earlier return the first
+  else if ((*(job_t*)x).time_remaining < (*(job_t*)y).time_remaining)// if the first arrived earlier return the first
   {
     return -1;
   }
@@ -119,7 +119,7 @@ int FirstComeFirstServe(const void * a, const void * b)
 
 bool hasjobfinished(job_t * job)
 {
-  if (job->time_remaining == job->runtime)
+  if (job->time_remaining == 0)
   {
     return true;
   }
@@ -201,28 +201,25 @@ max_remaining_time_vals Remaining_time_finder(int time)
   max_remaining_time_vals returnvals;
   int temp = 0;
 
+  returnvals.max_remaining_time_num = INT_MAX;
+  returnvals.max_remaining_time_index = INT_MAX;
+  returnvals.max_remaining_time_pid = INT_MAX;
 
-  returnvals.max_remaining_time_num = INT_MIN;
-  returnvals.max_remaining_time_index = INT_MIN;
-  returnvals.max_remaining_time_pid = INT_MIN;
   while( a < ncores  )
   {
     int time_diff = 0;
     time_diff = time - corearr[a]->start_time;
     temp = corearr[a]->time_remaining - time_diff;
 
-
-    if( temp > returnvals.max_remaining_time_num )
+    if( temp < returnvals.max_remaining_time_num )
     {
       returnvals.max_remaining_time_num = temp;
       returnvals.max_remaining_time_index = a ;
       returnvals.max_remaining_time_pid = corearr[a]->job_number;
-
-
     }
     else if (corearr[a]->time_remaining == returnvals.max_remaining_time_num)
     {
-        if(corearr[a]->job_number >   returnvals.max_remaining_time_pid)
+        if(corearr[a]->job_number > returnvals.max_remaining_time_pid)
         {
           returnvals.max_remaining_time_num = temp;
           returnvals.max_remaining_time_index = a ;
@@ -341,17 +338,15 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
     newjob->priority = priority;
     newjob->runtime = running_time;
     newjob->time_remaining = running_time;
-    newjob->start_time = 0;
+    newjob->start_time = time;
     newjob->arrival_time = time;
     newjob->job_number = job_number;
 
 
-    max_remaining_time_vals remaining_time_vals;
+
     max_priority_vals priority_vals;
       printf("\n%s\n","9" );
-    printf("\n%s %i\n","time:",time );
-    printf("\n%s %i\n","arrival_time:",newjob->arrival_time );
-    //response_time   += time - newjob->arrival_time;
+
 
     int resp = scheduler_core_available(newjob);
     printf("\n%s %i\n","resp:",resp );
@@ -368,29 +363,20 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
         printf("\n%s\n","12" );
       priority_vals = Max_Priority_Finder(newjob);
         printf("\n%s\n","14" );
-      remaining_time_vals = Remaining_time_finder(time);
+
         printf("\n%s\n","13" );
 
+        if(type == PSJF){
+            
+            //update the time remaining in the current core
+            corearr[0]->time_remaining -= (time - corearr[0]->start_time);
+            if(newjob->time_remaining < corearr[0]->time_remaining){
+                priqueue_offer(&Q, corearr[0]);
+                corearr[0] = newjob;
 
-      if(type == PSJF){
-        printf("\n%s\n","22" );
-          if(newjob->start_time < remaining_time_vals.max_remaining_time_num){
-              //condense variable name
-              int max_rti = remaining_time_vals.max_remaining_time_index;
-
-              //Grab job from the right core and calculate the time remaining until completion
-              job_t* temp = corearr[max_rti];
-              temp->time_remaining = temp-> time_remaining - time - temp->start_time;
-
-              if(temp->time_remaining == temp->runtime){
-                  response_time = response_time - time - temp->arrival_time;
-              }
-              priqueue_offer(&Q,temp);
-              corearr[max_rti] = temp;
-              temp->start_time = time;
-              return max_rti;
-          }
-      }
+                return 0;
+            }
+        }
 
       if ( type == PPRI)
 
@@ -402,7 +388,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
           int temp_time = time - current_job->start_time;
           int newtime = current_job->time_remaining - temp_time;
           current_job->time_remaining = newtime;
-          if (hasjobfinished(current_job))
+          if ((current_job))
           {
             response_time += -1 *( time - current_job->arrival_time);
           }
@@ -442,12 +428,13 @@ int scheduler_job_finished(int core_id, int job_number, int time)
     job_t* finished_job = corearr[core_id];
 
     //Calculate the different time measurements from the finished job
-    wait_time       += time - finished_job->runtime - finished_job->arrival_time;
-    turnaround_time += time - finished_job->arrival_time;
-    response_time += time - finished_job->runtime - finished_job->arrival_time;
-
-  //  printf("\n%s %i\n","wait_time:",wait_time );
-    nJobs = nJobs + 1;
+    wait_time       += (time - finished_job->runtime - finished_job->arrival_time);
+    turnaround_time += (time - finished_job->arrival_time);
+    response_time   += (finished_job->start_time - finished_job->arrival_time);
+    printf("-------------\n");
+    printf("Start Time: %i \nArrival Time: %i\n",finished_job->start_time,finished_job->arrival_time);
+    printf("-------------\n");
+    nJobs++;
 
     //Cleanup the job
     free(finished_job);
@@ -458,8 +445,11 @@ int scheduler_job_finished(int core_id, int job_number, int time)
     if(priqueue_peek(&Q) != NULL){ //Check if the Queue is empty
         printf("\n%s\n","24" );
 
+
         //Grab the job at the top of the queue and add it to the core
-        job_t* new_job = priqueue_poll(&Q);
+        priqueue_print(&Q);
+        job_t* new_job = (job_t*)priqueue_poll(&Q);
+
         new_job->start_time = time;
         corearr[core_id] = new_job;
         return new_job->job_number;
@@ -515,8 +505,6 @@ int scheduler_quantum_expired(int core_id, int time)
  */
 float scheduler_average_waiting_time()
 {
-    printf("\n%s %i\n","wait_time:",wait_time );
-  printf("\n%s %i\n","nJobs:",nJobs );
   float sawt = (float)wait_time / (float)nJobs;
 	return sawt;
 }
@@ -531,9 +519,6 @@ float scheduler_average_waiting_time()
  */
 float scheduler_average_turnaround_time()
 {
-  printf("\n%s %i\n","turnaround_time:",turnaround_time );
-printf("\n%s %i\n","nJobs:",nJobs );
-
   float avgtt = (float)turnaround_time / (float)nJobs;
 	return avgtt;
 }
@@ -548,9 +533,7 @@ printf("\n%s %i\n","nJobs:",nJobs );
  */
 float scheduler_average_response_time()
 {
-  printf("\n%s %i\n","response_time:",response_time );
-printf("\n%s %i\n","response_time:",nJobs );
-  float respavg = (float)response_time / (float) nJobs;
+  float respavg = (float)response_time / (float)nJobs;
 	return respavg;
 }
 
