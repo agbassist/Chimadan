@@ -183,6 +183,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
 	job_t* newjob = malloc(sizeof(job_t));
     newjob->priority = priority;
     newjob->runtime = running_time;
+
     newjob->time_remaining = running_time;
     newjob->time_added = 0;
     newjob->arrival_time = time;
