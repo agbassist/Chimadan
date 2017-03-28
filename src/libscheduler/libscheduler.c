@@ -349,7 +349,9 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
     max_remaining_time_vals remaining_time_vals;
     max_priority_vals priority_vals;
       printf("\n%s\n","9" );
-
+    printf("\n%s %i\n","time:",time );
+    printf("\n%s %i\n","arrival_time:",newjob->arrival_time );
+    //response_time   += time - newjob->arrival_time;
 
     int resp = scheduler_core_available(newjob);
     printf("\n%s %i\n","resp:",resp );
@@ -442,8 +444,9 @@ int scheduler_job_finished(int core_id, int job_number, int time)
     //Calculate the different time measurements from the finished job
     wait_time       += time - finished_job->runtime - finished_job->arrival_time;
     turnaround_time += time - finished_job->arrival_time;
-    response_time   += finished_job->start_time - finished_job->arrival_time;
-    nJobs += nJobs + 1;
+
+  //  printf("\n%s %i\n","wait_time:",wait_time );
+    nJobs = nJobs + 1;
 
     //Cleanup the job
     free(finished_job);
@@ -511,7 +514,9 @@ int scheduler_quantum_expired(int core_id, int time)
  */
 float scheduler_average_waiting_time()
 {
-  float sawt = wait_time / nJobs;
+    printf("\n%s %i\n","wait_time:",wait_time );
+  printf("\n%s %i\n","nJobs:",nJobs );
+  float sawt = (float)wait_time / (float)nJobs;
 	return sawt;
 }
 
@@ -525,7 +530,10 @@ float scheduler_average_waiting_time()
  */
 float scheduler_average_turnaround_time()
 {
-  float avgtt = turnaround_time / nJobs;
+  printf("\n%s %i\n","turnaround_time:",turnaround_time );
+printf("\n%s %i\n","nJobs:",nJobs );
+
+  float avgtt = (float)turnaround_time / (float)nJobs;
 	return avgtt;
 }
 
@@ -539,7 +547,9 @@ float scheduler_average_turnaround_time()
  */
 float scheduler_average_response_time()
 {
-  float respavg = response_time / nJobs;
+  printf("\n%s %i\n","response_time:",response_time );
+printf("\n%s %i\n","response_time:",nJobs );
+  float respavg = (float)response_time / (float) nJobs;
 	return respavg;
 }
 
