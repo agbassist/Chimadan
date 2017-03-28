@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 #include "libscheduler.h"
 #include "../libpriqueue/libpriqueue.h"
@@ -104,9 +105,9 @@ int scheduler_core_available(job_t* newjob)
   int a = 0;
   while( a < ncores  )
   {
-    if(jtarr[a] ==  NULL)
+    if(corearr[a] ==  NULL)
     {
-      jtarr[a] = newjob;
+      corearr[a] = newjob;
 
       return a;
     }
@@ -119,26 +120,26 @@ max_priority_vals Max_Priority_Finder(job_t* newjob)
 {
   int a = 0;
   max_priority_vals returnvals;
-  returnvals.max_priority_num = MIN_INT;
-  returnvals.max_priority_index = MIN_INT;
-  returnvals.max_priority_pid = MIN_INT;
+  returnvals.max_priority_num = INT_MIN;
+  returnvals.max_priority_index = INT_MIN;
+  returnvals.max_priority_pid = INT_MIN;
   while( a < ncores  )
   {
-    if(jtarr[a]->prioriy > returnvals.max_priority_num)
+    if(corearr[a]->priority > returnvals.max_priority_num)
     {
-      returnvals.max_priority_num = jtarr[a]->prioriy;
-      returnvals.max_priority_index = jtarr[a]->job_number;
+      returnvals.max_priority_num = corearr[a]->priority;
+      returnvals.max_priority_index = corearr[a]->job_number;
       returnvals.max_priority_pid = a;
 
 
     }
-    else if (jtarr[a]->prioriy == returnvals.max_priority_num)
+    else if (corearr[a]->priority == returnvals.max_priority_num)
     {
-        if(jtarr[a]=>job_number > returnvals.max_priority_pid)
+        if(corearr[a]->job_number > returnvals.max_priority_pid)
         {
-          returnvals.max_priority_num = jtarr[a]->prioriy;
+          returnvals.max_priority_num = corearr[a]->priority;
           returnvals.max_priority_index = a;
-          returnvals.max_priority_pid = jtarr[a]->job_number;
+          returnvals.max_priority_pid = corearr[a]->job_number;
         }
     }
     else
@@ -152,37 +153,38 @@ max_priority_vals Max_Priority_Finder(job_t* newjob)
 }
 
 
-max_remaining_time_vals Remaining_time_finder(job_t* newjob)
+max_remaining_time_vals Remaining_time_finder(int time)
 {
   int a = 0;
   max_remaining_time_vals returnvals;
   int temp = 0;
 
 
-  returnvals.max_remaining_time_num = MIN_INT;
-  returnvals.max_remaining_time_index = MIN_INT;
-  returnvals.max_remaining_time_pid = MIN_INT;
+  returnvals.max_remaining_time_num = INT_MIN;
+  returnvals.max_remaining_time_index = INT_MIN;
+  returnvals.max_remaining_time_pid = INT_MIN;
   while( a < ncores  )
   {
-    time_diff = time - jtarr[a]->time_added;
-    temp = jtarr[a]->time_remaining - time_diff;
+    int time_diff = 0;
+    time_diff = time - corearr[a]->start_time;
+    temp = corearr[a]->time_remaining - time_diff;
 
 
     if( temp > returnvals.max_remaining_time_num )
     {
       returnvals.max_remaining_time_num = temp;
       returnvals.max_remaining_time_index = a ;
-      returnvals.max_remaining_time_pid = jtarr[a]->job_number;
+      returnvals.max_remaining_time_pid = corearr[a]->job_number;
 
 
     }
-    else if (jtarr[a]->prioriy == returnvals.max_remaining_time_num)
+    else if (corearr[a]->time_remaining == returnvals.max_remaining_time_num)
     {
-        if(jtarr[a]=>job_number >   returnvals.max_remaining_time_pid)
+        if(corearr[a]->job_number >   returnvals.max_remaining_time_pid)
         {
           returnvals.max_remaining_time_num = temp;
           returnvals.max_remaining_time_index = a ;
-          returnvals.max_remaining_time_pid = jtarr[a]->job_number;
+          returnvals.max_remaining_time_pid = corearr[a]->job_number;
         }
     }
     else
@@ -246,11 +248,11 @@ void scheduler_start_up(int cores, scheme_t scheme)
     ncores = cores;
     int sojt = sizeof(job_t);
     int allocamount = ncores *sojt;
-    jtarr = malloc(allocamount);
+    corearr = malloc(allocamount);
     int a;
     for (a =0; a < ncores; a++)
     {
-      jtarr[a] = NULL;//NULL
+      corearr[a] = NULL;//NULL
     }
 
     //priqueue_init(Queue);
@@ -285,7 +287,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
     newjob->runtime = running_time;
 
     newjob->time_remaining = running_time;
-    newjob->time_added = 0;
+    newjob->start_time = 0;
     newjob->arrival_time = time;
     newjob->job_number = job_number;
 
@@ -326,7 +328,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
 int scheduler_job_finished(int core_id, int job_number, int time)
 {
     //Grab the finished job from the core
-    job_t* finished_job = jtarr[core_id];
+    job_t* finished_job = corearr[core_id];
 
     //Calculate the different time measurements from the finished job
     wait_time       += time - finished_job->runtime - finished_job->arrival_time;
@@ -343,7 +345,7 @@ int scheduler_job_finished(int core_id, int job_number, int time)
         //Grab the job at the top of the queue and add it to the core
         job_t* new_job = priqueue_poll(&Q);
         new_job->start_time = time;
-        jtarr[core_id] = new_job;
+        corearr[core_id] = new_job;
         return new_job->job_number;
     }
     else{ //if the Queue is empty, the core remains idle
@@ -424,18 +426,18 @@ void scheduler_clean_up()
   int x =0 ;
   while (x < ncores)
   {
-    if(jtarr[x] == NULL)
+    if(corearr[x] == NULL)
     {
      //do nothing beacause no job_task inside
     }
     else
     {
-       free(jtarr[x]);
+       free(corearr[x]);
 
     }
     x++;
   }
-  free(jtarr);
+  free(corearr);
 }
 
 
