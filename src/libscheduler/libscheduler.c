@@ -319,7 +319,28 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
       priority_vals = Max_Priority_Finder(newjob);
       remaining_time_vals = Remaining_time_finder(time);
 
+
+      if(type == PSJF){
+          if(newjob->start_time < remaining_time_vals.max_remaining_time_num){
+              //condense variable name
+              int max_rti = remaining_time_vals.max_remaining_time_index;
+
+              //Grab job from the right core and calculate the time remaining until completion
+              job_t* temp = corearr[max_rti];
+              temp->time_remaining = temp-> time_remaining - time - temp->start_time;
+
+              if(temp->time_remaining == temp->runtime){
+                  response_time = response_time - time - temp->arrival_time;
+              }
+              priqueue_offer(&Q,temp);
+              corearr[max_rti] = temp;
+              temp->start_time = time;
+              return max_rti;
+          }
+      }
+
       if ( type == PPRI)
+
       {
         if( newjob->priority < priority_vals.max_priority_num)
         {
@@ -337,13 +358,9 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
         }
       }
 
-
-
-
-
-
     }
-    //if(coreavailable )
+
+    return -1;
 
 }
 
