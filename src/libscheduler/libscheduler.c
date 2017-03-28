@@ -185,7 +185,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
     newjob->runtime = running_time;
 
     newjob->time_remaining = running_time;
-    newjob->time_added = 0;
+    newjob->start_time = 0;
     newjob->arrival_time = time;
     newjob->job_number = job_number;
 
@@ -255,7 +255,22 @@ int scheduler_job_finished(int core_id, int job_number, int time)
  */
 int scheduler_quantum_expired(int core_id, int time)
 {
- // job_t
+    job_t * temp_job = jtarr[core_id];
+
+    if(priqueue_peek(&Q) != NULL){ //Check if the Queue is empty
+
+        //Add the expired job to the queue, and schedule the next job on the queue
+        priqueue_offer(&Q,temp_job);
+        temp_job = priqueue_poll(&Q);
+        temp_job->start_time = time;
+        jtarr[core_id]= temp_job;
+        return temp_job->job_number;
+    }
+    else{
+        //Return -1 if the Queue is empty and remain idle
+        return -1;
+    }
+
 }
 
 
