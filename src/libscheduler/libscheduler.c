@@ -440,9 +440,9 @@ int scheduler_job_finished(int core_id, int job_number, int time)
     job_t* finished_job = corearr[core_id];
 
     //Calculate the different time measurements from the finished job
-    wait_time       += time - finished_job->runtime - finished_job->arrival_time;
-    turnaround_time += time - finished_job->arrival_time;
-    response_time   += finished_job->start_time - finished_job->arrival_time;
+    wait_time       += (time - finished_job->runtime - finished_job->arrival_time);
+    turnaround_time += (time - finished_job->arrival_time);
+    response_time   += (finished_job->start_time - finished_job->arrival_time);
     nJobs += nJobs + 1;
 
     //Cleanup the job
@@ -454,8 +454,10 @@ int scheduler_job_finished(int core_id, int job_number, int time)
     if(priqueue_peek(&Q) != NULL){ //Check if the Queue is empty
         printf("\n%s\n","24" );
 
+        
         //Grab the job at the top of the queue and add it to the core
         job_t* new_job = priqueue_poll(&Q);
+
         new_job->start_time = time;
         corearr[core_id] = new_job;
         return new_job->job_number;
@@ -511,7 +513,7 @@ int scheduler_quantum_expired(int core_id, int time)
  */
 float scheduler_average_waiting_time()
 {
-  float sawt = wait_time / nJobs;
+  float sawt = (float)wait_time / (float)nJobs;
 	return sawt;
 }
 
@@ -525,7 +527,7 @@ float scheduler_average_waiting_time()
  */
 float scheduler_average_turnaround_time()
 {
-  float avgtt = turnaround_time / nJobs;
+  float avgtt = (float)turnaround_time / (float)nJobs;
 	return avgtt;
 }
 
@@ -539,7 +541,7 @@ float scheduler_average_turnaround_time()
  */
 float scheduler_average_response_time()
 {
-  float respavg = response_time / nJobs;
+  float respavg = (float)response_time / (float)nJobs;
 	return respavg;
 }
 

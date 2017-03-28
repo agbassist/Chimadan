@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "libpriqueue.h"
 
@@ -103,20 +104,21 @@ void *priqueue_peek(priqueue_t *q)
  */
 void *priqueue_poll(priqueue_t *q)
 {
-	task_t * temp = q->head;
-    if(temp == NULL){
+    if(q->head == NULL){
         return NULL;
     }
     else{
+        task_t * temp = q->head;
         if(temp->next != NULL){
             q->head = temp->next;
         }
         else{ //size of queue is 1
             q->head = NULL;
         }
-
-        void* data = temp->ptr;
+        void* data = malloc(sizeof(void));
+        memcpy(data, temp->ptr, sizeof(void));
         free(temp);
+
         q->size--;
 
         return(data);
@@ -139,7 +141,7 @@ void *priqueue_at(priqueue_t *q, int index)
     if(index==0){
         return q->head->ptr;
     }
-    
+
     task_t * temp = q->head;
     int count = 0;
 
