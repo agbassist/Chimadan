@@ -275,6 +275,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
                 corearr[index_of_max] = newjob;
                 return index_of_max;
             }
+
         }
 
       if (type == PPRI){
@@ -287,6 +288,12 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
                   //If a new max is found, update location and value of max
                   max_priority_num = corearr[i]->priority;
                   index_of_max = i;
+              }
+              else if(corearr[i]->priority == max_priority_num){
+                  if(corearr[i]->arrival_time > corearr[index_of_max]->arrival_time){
+                      max_priority_num = corearr[i]->priority;
+                      index_of_max = i;
+                  }
               }
           }
           //If the new job's remaining time is less than the chose core
