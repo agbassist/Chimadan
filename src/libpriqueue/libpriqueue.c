@@ -187,12 +187,7 @@ int priqueue_remove(priqueue_t *q, void *ptr)
 
                 while(temp != NULL)
                 { //while temp is not at the end
-                        //printf("The values being compared are: ");
-                        //printf("%i", *(int *)ptr);
-                        //printf(" , ");
-                        //printf("%i\n", *(int *)(temp->ptr));
 
-                        //priqueue_print(q);
 
                         if(temp->ptr == ptr)
                         { //if we have a match
@@ -288,7 +283,7 @@ void priqueue_destroy(priqueue_t *q)
 
 void priqueue_print(priqueue_t *q)
 {
-        printf("LOOK AT MEEEE I'M MR. MEESEEKS\n-----------------------------------\n");
+        
         task_t* temp = q->head;
 
         if(temp != NULL)

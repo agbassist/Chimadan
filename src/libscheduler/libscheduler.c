@@ -126,8 +126,7 @@ int scheduler_core_available(job_t* newjob)
 */
 void scheduler_start_up(int cores, scheme_t scheme)
 {
-        printf("\n%s\n","3" );
-        //printf("%s %n\n","Cores amount:", cores );
+
         //assign the type of comprison with the initialization of the queue
         if(scheme == FCFS)
         {
@@ -161,19 +160,15 @@ void scheduler_start_up(int cores, scheme_t scheme)
         type = scheme;
 
         ncores = cores;
-        printf("%s %d\n","cores:",cores );
         int sojt = sizeof(job_t);
-        printf("%s %d\n","sojt:",sojt );
         int allocamount = ncores *sojt;
-        printf("%s %d\n","allocamount:",allocamount );
         corearr = (job_t**)malloc(allocamount);
         int a;
         for (a =0; a < ncores; a++)
         {
-                printf("%s %d\n","a:",a );
                 corearr[a] = NULL;//NULL
         }
-        printf("\n%s\n","4" );
+
 //priqueue_init(Queue);
 }
 
@@ -200,8 +195,6 @@ void scheduler_start_up(int cores, scheme_t scheme)
  */
 int scheduler_new_job(int job_number, int time, int running_time, int priority)
 {
-        printf("\n%s\n","5" );
-
         job_t* newjob = malloc(sizeof(job_t));
         newjob->priority = priority;
         newjob->runtime = running_time;
@@ -211,17 +204,10 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
         newjob->job_number = job_number;
         newjob->response = INT_MIN;
 
-        printf("\n%s\n","9" );
-
-
         int resp = scheduler_core_available(newjob);
-        printf("\n%s %i\n","resp:",resp );
-
-        printf("\n%s\n","10" );
         if (resp != -1 )
         {
                 newjob->response = 0;
-                printf("\n%s\n","11" );
                 return resp;
         //the new job has been added
         }
@@ -296,7 +282,6 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
                 }
 
         }
-        printf("\n%s\n","8" );
         priqueue_offer(&Q, newjob);
         return -1;
 }
@@ -320,26 +305,17 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
 int scheduler_job_finished(int core_id, int job_number, int time)
 {
         //Grab the finished job from the core
-        printf("\n%s\n","6" );
         job_t* finished_job = corearr[core_id];
 
         //Calculate the different time measurements from the finished job
         wait_time       += (time - finished_job->runtime - finished_job->arrival_time);
         turnaround_time += (time - finished_job->arrival_time);
         response_time += finished_job->response;
-        /*
-        printf("Calculated Response Time: %i\n",finished_job->response);
-        printf("Arrival Time: %i\n",finished_job->arrival_time);
-        printf("Clock Time: %i\n",time);
-        */
+
         Nums[num] = finished_job->response;
         num++;
 
-        //printf("\n\n\nAdded Response time: %i to total\n\n\n",finished_job->response);
 
-        //printf("-------------\n");
-        //printf("Start Time: %i \nArrival Time: %i\n",finished_job->start_time,finished_job->arrival_time);
-        //printf("-------------\n");
         nJobs++;
 
         //Cleanup the job
@@ -351,21 +327,10 @@ int scheduler_job_finished(int core_id, int job_number, int time)
 
         if(priqueue_peek(&Q) != NULL)
         { //Check if the Queue is empty
-                printf("\n%s\n","37" );
                 //Grab the job at the top of the queue and add it to the core
                 job_t* new_job = (job_t*)priqueue_poll(&Q);
 
                 new_job->start_time = time;
-
-                /*
-                if(new_job->job_number == 6){
-                printf("************\nTime Remaining: %i\nRunTime: %i\n*************\n",new_job->time_remaining,new_job->runtime);
-                printf("POOP Calculated Response Time: %i\n",new_job->response);
-                printf("POOP Arrival Time: %i\n",new_job->arrival_time);
-                printf("POOP Clock Time: %i\n",time);
-                printf("POOP PID: %i\n",new_job->job_number);
-                }
-                */
 
                 if(new_job->response == INT_MIN)
                 {
@@ -380,10 +345,8 @@ int scheduler_job_finished(int core_id, int job_number, int time)
         }
         else
         { //if the Queue is empty, the core remains idle
-                printf("\n%s\n","25" );
                 return -1;
         }
-        printf("\n%s\n","7" );
 }
 
 
@@ -467,14 +430,6 @@ float scheduler_average_turnaround_time()
  */
 float scheduler_average_response_time()
 {
-    /*
-  printf("[");
-  for(int i=0; i<= num; i++){
-      printf("%i, ",Nums[i]);
-  }
-  printf("]\n");
-*/
-
         float respavg = (float)response_time / (float)nJobs;
         return respavg;
 }
