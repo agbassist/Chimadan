@@ -233,9 +233,6 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
     newjob->arrival_time = time;
     newjob->job_number = job_number;
 
-
-
-    max_priority_vals priority_vals;
       printf("\n%s\n","9" );
 
 
@@ -276,7 +273,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
             }
         }
 
-      if ( type == PPRI){
+      if (type == PPRI){
           //Find the core with the max remaining time
           int max_priority_num = INT_MIN;
           int index_of_max = 0;
