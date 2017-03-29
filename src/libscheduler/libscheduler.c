@@ -367,14 +367,27 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
         printf("\n%s\n","13" );
 
         if(type == PSJF){
+            //Find the core with the max remaining time
+            int max_remaining_time = INT_MIN;
+            int index_of_max = 0;
+            for(int i=0; i<ncores;i++){//for each core
 
-            //update the time remaining in the current core
-            corearr[0]->time_remaining -= (time - corearr[0]->start_time);
-            if(newjob->time_remaining < corearr[0]->time_remaining){
-                priqueue_offer(&Q, corearr[0]);
-                corearr[0] = newjob;
+                //Update the remaining time for each core to find max
+                corearr[i]->time_remaining -= (time - corearr[i]->start_time);
 
-                return 0;
+                if(corearr[i]->time_remaining > max_remaining_time){
+                    //If a new max is found, update location and value of max
+                    max_remaining_time = corearr[i]->time_remaining;
+                    index_of_max = i;
+                }
+            }
+            //If the new job's remaining time is less than the chose core
+            if(newjob->time_remaining < corearr[index_of_max]->time_remaining){
+                //Add the currently executing job to the queue
+                priqueue_offer(&Q, corearr[index_of_max]);
+                //Put the new job in the core
+                corearr[index_of_max] = newjob;
+                return index_of_max;
             }
         }
 
