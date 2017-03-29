@@ -77,11 +77,11 @@ int PriorityFirst(const void * x, const void * y)
   }
   else
   {
-    if( (*(job_t*)x).runtime > (*(job_t*)y).runtime) //if the first arrived later return the second
+    if( (*(job_t*)x).arrival_time > (*(job_t*)y).arrival_time) //if the first arrived later return the second
     {
       return 1;
     }
-    else if ((*(job_t*)x).runtime < (*(job_t*)y).runtime)// if the first arrived earlier return the first
+    else if ((*(job_t*)x).arrival_time < (*(job_t*)y).arrival_time)// if the first arrived earlier return the first
     {
       return -1;
     }
@@ -233,9 +233,6 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
     newjob->arrival_time = time;
     newjob->job_number = job_number;
 
-
-
-    max_priority_vals priority_vals;
       printf("\n%s\n","9" );
 
 
@@ -268,6 +265,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
             }
             //If the new job's remaining time is less than the chose core
             if(newjob->time_remaining < corearr[index_of_max]->time_remaining){
+                  response_time -= time - corearr[index_of_max]->arrival_time;
                 //Add the currently executing job to the queue
                 priqueue_offer(&Q, corearr[index_of_max]);
                 //Put the new job in the core
@@ -290,6 +288,7 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
           }
           //If the new job's remaining time is less than the chose core
           if(newjob->priority < corearr[index_of_max]->priority){
+                response_time -= time - corearr[index_of_max]->arrival_time;
               //Add the currently executing job to the queue
               priqueue_offer(&Q, corearr[index_of_max]);
               //Put the new job in the core
