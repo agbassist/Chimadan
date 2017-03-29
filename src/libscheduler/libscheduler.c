@@ -541,6 +541,7 @@ void scheduler_clean_up()
     x++;
   }
   free(corearr);
+  priqueue_destroy(&Q);
 }
 
 
