@@ -271,8 +271,8 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
                 //Add the currently executing job to the queue
                 priqueue_offer(&Q, corearr[index_of_max]);
                 //Put the new job in the core
+                newjob->response = 0;
                 corearr[index_of_max] = newjob;
-                corearr[index_of_max]->response = 0;
                 return index_of_max;
             }
         }
@@ -294,8 +294,8 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
               //Add the currently executing job to the queue
               priqueue_offer(&Q, corearr[index_of_max]);
               //Put the new job in the core
+              newjob->response = 0;
               corearr[index_of_max] = newjob;
-              corearr[index_of_max]->response = 0;
               return index_of_max;
           }
       }
@@ -354,7 +354,7 @@ int scheduler_job_finished(int core_id, int job_number, int time)
         job_t* new_job = (job_t*)priqueue_poll(&Q);
 
         new_job->start_time = time;
-        if(new_job->response == INT_MIN){
+        if(new_job->response == INT_MIN || (new_job->time_remaining == new_job->runtime && type==PSJF)){
             new_job->response = time - new_job->arrival_time;
             printf("The Response Time is: %i\n",new_job->response);
             printf("The Arrival Time is: %i\n",new_job->arrival_time);
