@@ -284,6 +284,9 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
           int index_of_max = 0;
           for(int i=0; i<ncores;i++){//for each core
 
+              //Update the remaining time for each core (need to do this to calculate response time)
+              corearr[i]->time_remaining -= (time - corearr[i]->start_time);
+
               if(corearr[i]->priority > max_priority_num){
                   //If a new max is found, update location and value of max
                   max_priority_num = corearr[i]->priority;
@@ -314,7 +317,8 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
 
 }
 
-
+int Nums[100];
+int num = 0;
 /**
   Called when a job has completed execution.
 
@@ -341,6 +345,14 @@ int scheduler_job_finished(int core_id, int job_number, int time)
     turnaround_time += (time - finished_job->arrival_time);
 
     response_time += finished_job->response;
+    /*
+    printf("Calculated Response Time: %i\n",finished_job->response);
+    printf("Arrival Time: %i\n",finished_job->arrival_time);
+    printf("Clock Time: %i\n",time);
+    */
+    Nums[num] = finished_job->response;
+    num++;
+
     //printf("\n\n\nAdded Response time: %i to total\n\n\n",finished_job->response);
 
     //printf("-------------\n");
@@ -361,11 +373,38 @@ int scheduler_job_finished(int core_id, int job_number, int time)
         job_t* new_job = (job_t*)priqueue_poll(&Q);
 
         new_job->start_time = time;
-        if(new_job->response == INT_MIN || (new_job->time_remaining == new_job->runtime && type==PSJF)){
+
+        /*
+        if(new_job->job_number == 6){
+            printf("************\nTime Remaining: %i\nRunTime: %i\n*************\n",new_job->time_remaining,new_job->runtime);
+            printf("POOP Calculated Response Time: %i\n",new_job->response);
+            printf("POOP Arrival Time: %i\n",new_job->arrival_time);
+            printf("POOP Clock Time: %i\n",time);
+            printf("POOP PID: %i\n",new_job->job_number);
+        }
+        */
+
+        if(new_job->response == INT_MIN){
             new_job->response = time - new_job->arrival_time;
-            printf("The Response Time is: %i\n",new_job->response);
-            printf("The Arrival Time is: %i\n",new_job->arrival_time);
-            printf("The First CPU Cycle is: %i\n",time);
+
+            /*
+            printf("POOP Calculated Response Time: %i\n",new_job->response);
+            printf("POOP Arrival Time: %i\n",new_job->arrival_time);
+            printf("POOP Clock Time: %i\n",time);
+            printf("POOP PID: %i\n",new_job->job_number);
+            */
+
+        }
+        else if(new_job->time_remaining == new_job->runtime){
+            new_job->response = time - new_job->arrival_time;
+
+            /*
+            printf("POOP1 Calculated Response Time: %i\n",new_job->response);
+            printf("POOP1 Arrival Time: %i\n",new_job->arrival_time);
+            printf("POOP1 Clock Time: %i\n",time);
+            printf("POOP1 PID: %i\n",new_job->job_number);
+            */
+
         }
         corearr[core_id] = new_job;
         return new_job->job_number;
@@ -398,7 +437,7 @@ int scheduler_quantum_expired(int core_id, int time)
     job_t * current_job = priqueue_poll(&Q);
 
     if(current_job != NULL){ //Check if the Queue is empty
-      corearr[core_id]->time_remaining -= time - corearr[core_id]->start_time;
+      corearr[core_id]->time_remaining -= (time - corearr[core_id]->start_time);
       //Add the expired job to the queue, and schedule the next job on the queue
       //remaining
       //temp_job = priqueue_poll(&Q);
@@ -419,7 +458,7 @@ int scheduler_quantum_expired(int core_id, int time)
     }
     else{
 
-      //corearr[core_id]->time_remaining -= time - corearr[core_id]->start_time;
+      //corearr[core_id]->time_remaining -= (time - corearr[core_id]->start_time);
       //Return -1 if the Queue is empty and remain idle
       return -1;
   }
@@ -466,6 +505,14 @@ float scheduler_average_turnaround_time()
  */
 float scheduler_average_response_time()
 {
+    /*
+  printf("[");
+  for(int i=0; i<= num; i++){
+      printf("%i, ",Nums[i]);
+  }
+  printf("]\n");
+*/
+
   float respavg = (float)response_time / (float)nJobs;
 	return respavg;
 }
