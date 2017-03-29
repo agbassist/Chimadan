@@ -18,24 +18,6 @@
 */
 priqueue_t Q;
 
-
-typedef struct
-{
-  int max_priority_num;
-  int max_priority_index;
-  int max_priority_pid;
-
-} max_priority_vals;
-
-typedef struct
-{
-  int max_remaining_time_num;
-  int max_remaining_time_index;
-  int max_remaining_time_pid;
-
-} max_remaining_time_vals;
-
-
 typedef struct _job_t
 {
   int job_number;       //job id
@@ -145,97 +127,6 @@ int scheduler_core_available(job_t* newjob)
 
   return -1;
 }
-max_priority_vals Max_Priority_Finder(job_t* newjob)
-{
-  int a = 0;
-  printf("\n%s\n","15" );
-  max_priority_vals returnvals;
-  returnvals.max_priority_num = INT_MIN;
-  returnvals.max_priority_index = INT_MIN;
-  returnvals.max_priority_pid = INT_MIN;
-
-    printf("\n%s\n","16" );
-    //int b = corearr[1]->priority;
-    //printf("%s %i\n","cores:",ncores );
-  while( a < ncores  )
-  {
-      printf("%s %i\n","maxvalue:",returnvals.max_priority_num );
-      printf("%s %i\n","cores:",ncores );
-      printf("%s %i\n","a:",a );
-      printf("\n%s\n","17" );
-    if(corearr[a]->priority > returnvals.max_priority_num)
-    {
-      printf("\n%s\n","19" );
-      returnvals.max_priority_num = corearr[a]->priority;
-      returnvals.max_priority_index =a;
-      returnvals.max_priority_pid =  corearr[a]->job_number;
-
-
-    }
-    else if (corearr[a]->priority == returnvals.max_priority_num)
-    {
-      printf("\n%s\n","20" );
-        if(corearr[a]->job_number > returnvals.max_priority_pid)
-        {
-          printf("\n%s\n","21" );
-          returnvals.max_priority_num = corearr[a]->priority;
-          returnvals.max_priority_index = a;
-          returnvals.max_priority_pid = corearr[a]->job_number;
-        }
-    }
-    else
-    {
-        //the priority is not the highest
-    }
-    a++;
-  }
-  printf("%s\n","18" );
-
-  return returnvals;
-}
-
-
-max_remaining_time_vals Remaining_time_finder(int time)
-{
-  int a = 0;
-  max_remaining_time_vals returnvals;
-  int temp = 0;
-
-  returnvals.max_remaining_time_num = INT_MAX;
-  returnvals.max_remaining_time_index = INT_MAX;
-  returnvals.max_remaining_time_pid = INT_MAX;
-
-  while( a < ncores  )
-  {
-    int time_diff = 0;
-    time_diff = time - corearr[a]->start_time;
-    temp = corearr[a]->time_remaining - time_diff;
-
-    if( temp < returnvals.max_remaining_time_num )
-    {
-      returnvals.max_remaining_time_num = temp;
-      returnvals.max_remaining_time_index = a ;
-      returnvals.max_remaining_time_pid = corearr[a]->job_number;
-    }
-    else if (corearr[a]->time_remaining == returnvals.max_remaining_time_num)
-    {
-        if(corearr[a]->job_number > returnvals.max_remaining_time_pid)
-        {
-          returnvals.max_remaining_time_num = temp;
-          returnvals.max_remaining_time_index = a ;
-          returnvals.max_remaining_time_pid = corearr[a]->job_number;
-        }
-    }
-    else
-    {
-        //the priority is not the highest
-    }
-    a++;
-  }
-
-  return returnvals;
-}
-
 
 
 /**
@@ -360,12 +251,6 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
     }
     else
     {
-        printf("\n%s\n","12" );
-      priority_vals = Max_Priority_Finder(newjob);
-        printf("\n%s\n","14" );
-
-        printf("\n%s\n","13" );
-
         if(type == PSJF){
             //Find the core with the max remaining time
             int max_remaining_time = INT_MIN;
@@ -391,42 +276,26 @@ int scheduler_new_job(int job_number, int time, int running_time, int priority)
             }
         }
 
-      if ( type == PPRI)
+      if ( type == PPRI){
+          //Find the core with the max remaining time
+          int max_priority_num = INT_MIN;
+          int index_of_max = 0;
+          for(int i=0; i<ncores;i++){//for each core
 
-      {
-        printf("\n%s\n","23" );
-        if( newjob->priority < priority_vals.max_priority_num)
-        {
-          printf("\n%s\n","24" );
-          job_t * current_job = corearr[priority_vals.max_priority_index];
-            printf("%s %d\n","priority_vals.max_priority_index:",priority_vals.max_priority_index );
-          //printf("\n%s\n","25" );
-          int temp_time;
-          printf("\n%s\n","33" );
-          temp_time = time - current_job->start_time;
-            printf("%s %d\n","priority_vals.max_priority_index:",priority_vals.max_priority_index );
-          //printf("\n%s\n","26" );
-
-          int newtime = current_job->time_remaining - temp_time;
-          printf("\n%s\n","27" );
-          current_job->time_remaining = newtime;
-          //printf("\n%s\n","28" );
-          if (hasjobfinished(current_job))
-          {
-            printf("\n%s\n","29" );
-            response_time += -1 *( time - current_job->arrival_time);
+              if(corearr[i]->priority > max_priority_num){
+                  //If a new max is found, update location and value of max
+                  max_priority_num = corearr[i]->priority;
+                  index_of_max = i;
+              }
           }
-        //  printf("\n%s\n","30" );
-          priqueue_print(&Q);
-          printf("\n%s\n","40" );
-          priqueue_offer(&Q, current_job);
-        //    printf("\n%s\n","41" );
-            priqueue_print(&Q);
-          printf("\n%s\n","31" );
-          newjob->start_time = time;
-        //  printf("\n%s\n","32" );
-          return priority_vals.max_priority_index;
-        }
+          //If the new job's remaining time is less than the chose core
+          if(newjob->priority < corearr[index_of_max]->priority){
+              //Add the currently executing job to the queue
+              priqueue_offer(&Q, corearr[index_of_max]);
+              //Put the new job in the core
+              corearr[index_of_max] = newjob;
+              return index_of_max;
+          }
       }
 
     }
